@@ -3,7 +3,8 @@
 import os
 import torch
 import json
-from PIL import Image
+from PIL import Image, ImageDraw
+import random
 
 class DelftBikeDataset(object):
     def __init__(self, root, json_path, transforms, mode='train'):
@@ -57,3 +58,28 @@ class DelftBikeDataset(object):
 
     def __len__(self):
         return len(self.imgs)
+    
+    def visualize(self, idx):
+        img_path = os.path.join(self.root, self.image_path, self.imgs[idx])
+        img = Image.open(img_path).convert("RGB")
+        labels = self.json_data[self.imgs[idx]]
+        print(labels)
+        draw = ImageDraw.Draw(img)
+        has_low_conf = False
+        for ind,i in enumerate(labels['parts'],0):
+            lab = labels['parts'][i]
+            if  lab['object_state'] not in ["intact"] :
+                loc = lab['absolute_bounding_box']
+                xmin = loc['left']
+                xmax = loc['left'] + loc['width']
+                ymin = loc['top']
+                ymax = loc['top'] + loc['height']
+                obj_stat = lab["object_state"]
+                obj_trust = lab["trust"]
+                if float(obj_trust) < 0.8:
+                    has_low_conf = True
+                    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                    draw.rectangle([(xmin, ymin), (xmax, ymax)], outline=color)
+                    draw.text((xmin, ymin), f"{i} : {obj_stat} {obj_trust}", fill=color)
+        if has_low_conf:        
+            img.show()
