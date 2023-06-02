@@ -1,4 +1,4 @@
 torchvision
-pytorch>=1.2
+torch
 docopt
-numpy==1.17.4
+numpy

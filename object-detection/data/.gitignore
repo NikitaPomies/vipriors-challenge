@@ -1,2 +1,5 @@
 test/
 train/
+README.pdf
+train_annotations.json
+fake_test_annotations.json

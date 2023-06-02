@@ -5,6 +5,7 @@ import torch
 import json
 from PIL import Image, ImageDraw
 import random
+from typing import Literal
 
 class DelftBikeDataset(object):
     def __init__(self, root, json_path, transforms, mode='train'):
@@ -59,7 +60,7 @@ class DelftBikeDataset(object):
     def __len__(self):
         return len(self.imgs)
     
-    def visualize(self, idx,visu_mode="all"):
+    def visualize(self, idx,visu_mode : Literal["all","non-intact"]="all"):
         """
         Display images with the label bounding box.
         visu_mode : 
