@@ -59,27 +59,35 @@ class DelftBikeDataset(object):
     def __len__(self):
         return len(self.imgs)
     
-    def visualize(self, idx):
+    def visualize(self, idx,visu_mode="all"):
+        """
+        Display images with the label bounding box.
+        visu_mode : 
+            - "all" : visualize all parts
+            - "non-intact" : visualize all non intact parts
+            
+        """
         img_path = os.path.join(self.root, self.image_path, self.imgs[idx])
         img = Image.open(img_path).convert("RGB")
         labels = self.json_data[self.imgs[idx]]
-        print(labels)
         draw = ImageDraw.Draw(img)
-        has_low_conf = False
         for ind,i in enumerate(labels['parts'],0):
             lab = labels['parts'][i]
-            if  lab['object_state'] not in ["intact"] :
+            if  lab['object_state']:
                 loc = lab['absolute_bounding_box']
                 xmin = loc['left']
                 xmax = loc['left'] + loc['width']
                 ymin = loc['top']
                 ymax = loc['top'] + loc['height']
-                obj_stat = lab["object_state"]
+
+                obj_state = lab["object_state"]
                 obj_trust = lab["trust"]
-                if float(obj_trust) < 0.8:
-                    has_low_conf = True
-                    color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                color = (random.randint(0, 255), random.randint(0, 255), random.randint(0, 255))
+                if visu_mode =="all":
                     draw.rectangle([(xmin, ymin), (xmax, ymax)], outline=color)
-                    draw.text((xmin, ymin), f"{i} : {obj_stat} {obj_trust}", fill=color)
-        if has_low_conf:        
-            img.show()
+                    draw.text((xmin, ymin), f"{i} : {obj_state} {obj_trust}", fill=color)
+                elif visu_mode == "non-intact " and obj_state != "intact":
+                    draw.rectangle([(xmin, ymin), (xmax, ymax)], outline=color)
+                    draw.text((xmin, ymin), f"{i} : {obj_state} {obj_trust}", fill=color)
+               
+        img.show()
